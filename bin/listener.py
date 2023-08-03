@@ -1,4 +1,5 @@
 import os
+import re
 
 from dotenv import load_dotenv
 import sounddevice as sd
@@ -6,6 +7,8 @@ import numpy as np
 import openai
 from playsound import playsound
 from pynput.keyboard import Controller as KeyboardController, Key, Listener
+from rich.console import Console
+from rich.markdown import Markdown
 from scipy.io import wavfile
 from termcolor import colored, cprint
 
@@ -22,6 +25,11 @@ sample_rate = 16000
 keyboard_controller = KeyboardController()
 message_history = []
 
+def process_response_for_audio(response: str) -> str:
+    # substitute everything between ``` and ``` with a default string
+    response = re.sub(r'```.*?```', '(See code in terminal)', response, flags=re.M|re.S)
+    return response
+
 
 def main():
     def on_press(key):
@@ -37,6 +45,7 @@ def main():
         global recording
         global audio_data
         global message_history
+        console = Console()
         
         # When the right shift key is released, stop recording
         if key == RECORD_KEY:
@@ -60,6 +69,7 @@ def main():
             
             if transcript:
                 print(colored("User:", "red"), transcript)
+
                 # clear history when "clear" is said
                 letters_only = ''.join([char for char in transcript if char.isalpha()])
                 if letters_only.lower().strip() == 'clear':
@@ -67,11 +77,14 @@ def main():
                     print(colored("Assistant:", "green"), colored("History cleared.", "red"))
                     playsound('bin/sounds/clear.mp3')
                     return
+                
                 history = chatgpt(transcript, message_history)
                 message_history = history
                 response = history[-1]['content']
-                print(colored("Assistant:", "green"), response)
-                text_to_speech(response)
+                print(colored("Assistant:", "green"))
+                console.print(Markdown(response))
+                response_processed = process_response_for_audio(response)
+                text_to_speech(response_processed)
                 playsound('output.mp3')
 
 
