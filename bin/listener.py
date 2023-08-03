@@ -7,6 +7,7 @@ import openai
 from playsound import playsound
 from pynput.keyboard import Controller as KeyboardController, Key, Listener
 from scipy.io import wavfile
+from termcolor import colored, cprint
 
 from oa import apply_whisper, chatgpt
 from polly import text_to_speech
@@ -58,16 +59,18 @@ def main():
                 print(e)
             
             if transcript:
+                print(colored("User:", "red"), transcript)
                 # clear history when "clear" is said
                 letters_only = ''.join([char for char in transcript if char.isalpha()])
                 if letters_only.lower().strip() == 'clear':
                     message_history = []
+                    print(colored("Assistant:", "green"), colored("History cleared.", "red"))
                     playsound('bin/sounds/clear.mp3')
                     return
                 history = chatgpt(transcript, message_history)
                 message_history = history
-                print(message_history)
                 response = history[-1]['content']
+                print(colored("Assistant:", "green"), response)
                 text_to_speech(response)
                 playsound('output.mp3')
 
@@ -86,8 +89,10 @@ def main():
             listener.join()
 
 if __name__ == "__main__":
+    print(colored("Assistant:", "green"), "Started.")
     playsound('bin/sounds/start.mp3')
     try:
         main()
     except KeyboardInterrupt:
+        print(colored("Assistant:", "green"), "Closing.")
         playsound('bin/sounds/stop.mp3')
