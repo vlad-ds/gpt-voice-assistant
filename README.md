@@ -1,10 +1,14 @@
 # gpt-voice-assistant
 GPT-powered voice assistant in your terminal.
-Press a button on your keyboard and speak. GPT will respond in audio. And the response will be displayed nicely in the terminal.
+Press a button on your keyboard and speak. GPT will respond in audio. The response will be displayed nicely in the terminal.
 
 ![Alt Text](img/example.png)
 
 Additionally, the voice response will not attempt to read code but will direct you to the terminal instead.
+
+The assistant will keep track of the conversation. You can ask follow-up questions and the assistant will remember the context. However, this will increase costs as each API call will need to include all previous messages. 
+
+Say `clear` to clear the conversation history. The assistant will say "History cleared" and the conversation history will be cleared. This will free up the context and reduce costs.
 
 APIs used:
 * OpenAI Whisper for speech-to-text
