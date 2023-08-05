@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 
@@ -31,7 +32,7 @@ def process_response_for_audio(response: str) -> str:
     return response
 
 
-def main():
+def main(no_audio: bool = False):
     def on_press(key):
         global recording
         global audio_data
@@ -85,7 +86,8 @@ def main():
                 console.print(Markdown(response))
                 response_processed = process_response_for_audio(response)
                 text_to_speech(response_processed)
-                playsound('output.mp3')
+                if not no_audio:
+                    playsound('output.mp3')
 
 
     def callback(indata, frames, time, status):
@@ -102,10 +104,17 @@ def main():
             listener.join()
 
 if __name__ == "__main__":
+    # get --no-audio flag
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-audio", action="store_true")
+    
+    args = parser.parse_args()
+    
+    
     print(colored("Assistant:", "green"), "Started.")
     playsound('bin/sounds/start.mp3')
     try:
-        main()
+        main(no_audio = args.no_audio)
     except KeyboardInterrupt:
         print(colored("Assistant:", "green"), "Closing.")
         playsound('bin/sounds/stop.mp3')
