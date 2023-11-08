@@ -1,8 +1,10 @@
 import boto3
+from openai import OpenAI
 
 VOICE_ID = "Salli"
 
-def text_to_speech(text: str):
+
+def text_to_speech_polly(text: str):
     # Create an Amazon Polly client
     polly = boto3.client('polly')
     
@@ -18,3 +20,13 @@ def text_to_speech(text: str):
     # Save the audio to a file
     with open(output_file, 'wb') as f:
         f.write(response['AudioStream'].read())
+
+
+def text_to_speech_oa(text: str):
+    client = OpenAI()
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="nova",
+        input=text
+    )
+    response.stream_to_file('output.mp3')

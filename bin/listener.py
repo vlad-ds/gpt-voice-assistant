@@ -14,17 +14,19 @@ from scipy.io import wavfile
 from termcolor import colored, cprint
 
 from oa import apply_whisper, chatgpt
-from polly import text_to_speech
+from polly import text_to_speech_oa
 
 load_dotenv()
 key_label = os.environ.get("RECORD_KEY", "ctrl_r")
 RECORD_KEY = Key[key_label]
+print(RECORD_KEY)
 
 recording = False
 audio_data = []
 sample_rate = 16000
 keyboard_controller = KeyboardController()
 message_history = []
+
 
 def process_response_for_audio(response: str) -> str:
     # substitute everything between ``` and ``` with a default string
@@ -85,10 +87,9 @@ def main(no_audio: bool = False):
                 print(colored("Assistant:", "green"))
                 console.print(Markdown(response))
                 response_processed = process_response_for_audio(response)
-                text_to_speech(response_processed)
+                text_to_speech_oa(response_processed)
                 if not no_audio:
                     playsound('output.mp3')
-
 
     def callback(indata, frames, time, status):
         if status:
@@ -96,12 +97,12 @@ def main(no_audio: bool = False):
         if recording:
             audio_data.append(indata.copy())  # make sure to copy the indata
 
-
     with Listener(on_press=on_press, on_release=on_release) as listener:
         # This is the stream callback
         with sd.InputStream(callback=callback, channels=1, samplerate=sample_rate):
             # Just keep the script running
             listener.join()
+
 
 if __name__ == "__main__":
     # get --no-audio flag
@@ -109,12 +110,11 @@ if __name__ == "__main__":
     parser.add_argument("--no-audio", action="store_true")
     
     args = parser.parse_args()
-    
-    
+
     print(colored("Assistant:", "green"), "Started.")
-    playsound('bin/sounds/start.mp3')
+    # playsound('bin/sounds/start.mp3')
     try:
         main(no_audio = args.no_audio)
     except KeyboardInterrupt:
         print(colored("Assistant:", "green"), "Closing.")
-        playsound('bin/sounds/stop.mp3')
+        # playsound('bin/sounds/stop.mp3')
